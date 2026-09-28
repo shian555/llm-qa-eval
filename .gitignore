@@ -2,7 +2,14 @@ __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
-results/
+# 运行产物不入库，但放行演示种子（clone 即可在运行对比页复现闭环）
+results/*
+!results/runs
+results/runs/*
+!results/runs/r-seed-*.json
 *.egg-info/
 .venv/
 venv/
+
+# web 前端（dist 提交入库：托管平台免 Node 构建、clone 后无需 npm 即可启动）
+web/node_modules/

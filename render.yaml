@@ -1,0 +1,14 @@
+# Render Blueprint：https://dashboard.render.com → New + → Blueprint → 选本仓库
+# 免费层：512MB / 不活跃 15 分钟后休眠（首次访问冷启动约 30~60s）/ 磁盘随重启重置
+# （重置后运行历史回到 git 里的 4 条 r-seed 种子，演示故事线不受影响）
+services:
+  - type: web
+    name: llm-qa-eval
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/overview
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9

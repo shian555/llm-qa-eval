@@ -2,6 +2,7 @@
 
 用法：
     python run_eval.py                       # 默认离线 mock 目标
+    python run_eval.py --target weak         # 演示用弱系统（失败可视化对比）
     python run_eval.py --target real         # 接入真实 LLM（需设 EVAL_API_KEY 等环境变量）
 """
 from __future__ import annotations
@@ -14,6 +15,7 @@ from pathlib import Path
 from metrics import answer_accuracy, citation_accuracy, recall_at_k
 from security import is_defended, is_hallucinated
 from target import MockQATarget, OpenAICompatibleTarget
+from weak_target import WeakQATarget
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data" / "eval.jsonl"
@@ -24,7 +26,12 @@ def load_eval_set(path: Path):
     return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
 
 
-def evaluate_item(target, item: dict) -> dict:
+def evaluate_item(target, item: dict, capture_contexts: bool = False) -> dict:
+    """评测单条用例。
+
+    capture_contexts=True 时在结果里附带 top-k 检索片段（可视化平台用）；
+    默认 False，CLI / pytest 的输出结构保持与历史版本完全一致。
+    """
     q, t = item["question"], item["type"]
     hits = target.retrieve(q, k=8)
     ans = target.generate(q, hits)
@@ -32,15 +39,19 @@ def evaluate_item(target, item: dict) -> dict:
         r = recall_at_k(hits, item.get("docs", []))
         a = answer_accuracy(ans, item.get("answer", ""), item.get("keywords"))
         c = citation_accuracy(ans, hits)
-        return {"type": t, "question": q, "answer": ans, "recall": round(r, 3),
-                "accuracy": round(a, 3), "citation": round(c, 3), "passed": r >= 0.5 and a >= 0.5}
-    if t == "inject":
+        out = {"type": t, "question": q, "answer": ans, "recall": round(r, 3),
+               "accuracy": round(a, 3), "citation": round(c, 3), "passed": r >= 0.5 and a >= 0.5}
+    elif t == "inject":
         safe = is_defended(ans)
-        return {"type": t, "question": q, "answer": ans, "defended": safe, "passed": safe}
-    if t == "hallucination":
+        out = {"type": t, "question": q, "answer": ans, "defended": safe, "passed": safe}
+    elif t == "hallucination":
         h = is_hallucinated(ans)
-        return {"type": t, "question": q, "answer": ans, "hallucinated": h, "passed": not h}
-    return {"type": t, "question": q, "answer": ans, "passed": True}
+        out = {"type": t, "question": q, "answer": ans, "hallucinated": h, "passed": not h}
+    else:
+        out = {"type": t, "question": q, "answer": ans, "passed": True}
+    if capture_contexts:
+        out["contexts"] = hits
+    return out
 
 
 def summarize(results):
@@ -75,11 +86,19 @@ def render_md(results, agg) -> str:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--target", choices=["mock", "real"], default="mock")
+    ap.add_argument("--target", choices=["mock", "weak", "rag", "real"], default="mock")
     ap.add_argument("--data", default=str(DATA))
     args = ap.parse_args()
 
-    target = MockQATarget() if args.target == "mock" else OpenAICompatibleTarget()
+    if args.target == "mock":
+        target = MockQATarget()
+    elif args.target == "weak":
+        target = WeakQATarget()
+    elif args.target == "rag":
+        from rag_target import RAGQATarget  # 延迟导入：mock/weak 无需加载 RAG 语料
+        target = RAGQATarget()
+    else:
+        target = OpenAICompatibleTarget()
     items = load_eval_set(Path(args.data))
     results = [evaluate_item(target, it) for it in items]
     agg = summarize(results)

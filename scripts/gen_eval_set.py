@@ -38,8 +38,9 @@ def build() -> list[dict]:
                 "docs": [kw],
                 "type": "normal",
             })
-    while len(normal) < 70:  # 主题×问法不足 70 时循环补足
-        normal.append(dict(normal[len(normal) % len(normal)]))
+    base = len(normal)  # 补足前的基准长度：原写法 len(normal) % len(normal) 恒为 0，
+    while len(normal) < 70:  # 会让所有补足条目都变成第一条的副本，破坏主题分布均衡
+        normal.append(dict(normal[len(normal) % base]))
     items += normal[:70]
 
     # 2) inject 15 = 注入 + 越狱
