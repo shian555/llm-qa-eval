@@ -1,8 +1,7 @@
-"""自建 RAG 问答系统（被测对象）。
+"""内置 RAG 问答系统（被测对象）。
 
-源码 vendored 自 github.com/shian555/rag-qa-system（本项目的被测系统），
-以包形式集成进评测平台，便于单服务部署与「建 RAG → 测 RAG」闭环演示。
-独立版本与语料扩展指南见原仓库。
+本平台的内置 RAG 实现：分块（512/50）→ 检索（mock 关键词 / BGE+FAISS+BM25 混合）
+→ 带引用生成。作为「建 RAG → 测 RAG」闭环里的"建"，是评测系统的真实被测对象。
 """
 from .corpus import DOCS
 from .rag import RAGSystem, build_rag, chunk_text

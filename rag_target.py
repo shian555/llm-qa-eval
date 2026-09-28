@@ -1,4 +1,4 @@
-"""自建 RAG 被测对象：把 rag_impl（vendored from rag-qa-system）接入 QATarget 接口。
+"""自建 RAG 被测对象：把 rag_impl（内置 RAG 实现）接入 QATarget 接口。
 
 这是「建 RAG → 测 RAG → 按指标改进」闭环里的"建"：
 评测平台（run_eval / Web 平台）选中 rag 目标时，实际被测的就是这套 RAG 链路。

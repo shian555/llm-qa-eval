@@ -10,8 +10,8 @@
 
 ## 「建 RAG → 测 RAG → 改 RAG」完整闭环（自建系统实测）
 
-本平台的被测对象不只是 mock：内置自建 RAG 知识库问答系统（`rag_impl/`，源码 vendored 自
-[rag-qa-system](https://github.com/shian555/rag-qa-system)：分块 → 检索 → 带引用生成），
+本平台的被测对象不只是 mock：内置自建 RAG 知识库问答系统（`rag_impl/`：
+分块 → 检索 → 带引用生成），
 并真实发生过一次「评测发现缺陷 → 修复 → 复测验证」：
 
 | 运行 | inject 组通过率 | 归因 |

@@ -28,7 +28,7 @@ REGISTRY = [
     },
     {
         "id": "rag",
-        "label": "自建 RAG 知识库（rag-qa-system）",
+        "label": "自建 RAG 知识库问答",
         "description": "本项目自建的 RAG 问答系统（分块 → 检索 → 带引用生成，源码见 rag_impl/）。"
                        "默认离线 mock 链路；设 RAG_MODE=real 且配置 EVAL_API_KEY 后走 BGE+FAISS+BM25 混合检索 + LLM 生成。",
         "requires_env": [],
