@@ -6,7 +6,7 @@
 
 > 一个评测集 + 一套指标 + 一条 CI + 一个可视化平台，同时证明：**会测 AI 系统**（测开岗）+ **懂 LLM 评测工程**（AI开发岗）+ **有全栈交付能力**。
 
-> **🌐 在线 Demo**：https://llm-qa-eval.onrender.com （Render 免费层，首次访问冷启动约 1 分钟）
+> **🌐 在线 Demo**：https://llm-app-eval-ad7cxrtbq6g68wqwvmqcd3.streamlit.app （云端部署，15 分钟无访问自动休眠，首次打开需 30~60 秒唤醒）
 
 ## 「建 RAG → 测 RAG → 改 RAG」完整闭环（自建系统实测）
 
@@ -79,13 +79,13 @@ results/runs/*.json（schema v2，历史 report.json 自动迁移）
 | Playground | 单条试跑：任选目标 + top-k 调节，即时展示检索片段、答案引文高亮、gold 命中/三维指标/安全判定；内置话题与攻击载荷一键填入 |
 | About | 平台架构图、评测方法学与判定口径、运行环境、GitHub Actions 徽章、WeakQATarget 诚实声明 |
 
-### 面试演示动线（约 5 分钟）
+### 平台导览（推荐浏览路径，约 5 分钟）
 
 1. **Dashboard**：选 legacy(mock) 快照 → 满分基线，说明指标口径。
 2. **运行管理**：发起一次 WeakQATarget 评测 → 实时进度 → 详情页 15% 通过率，点开一条幻觉用例看「编造答案 + 越界引用 [9]」的归因证据。
 3. **Red Team**：注入组 ASR 100%，逐条展示被攻破答案的 defeat markers。
 4. **运行对比**：A=r-seed-rag-v1-noguard、B=r-seed-rag-v2-guarded → 注入通过率 73.3%→100%（+26.7pp），点开退化/改善明细看逐条归因；再对比 weak vs mock 演示 +85pp。
-5. **Playground**：现场点击攻击载荷 → 实时演示被攻破路径（如实说明 WeakQATarget 的缺陷是设计出来的，用于无 Key 环境演示归因能力；接真实 LLM 只需 `EVAL_API_KEY`）。
+5. **Playground**：点击攻击载荷 → 实时查看被攻破路径（WeakQATarget 的缺陷为刻意设计，用于无 Key 环境验证归因能力；接入真实 LLM 仅需 `EVAL_API_KEY`）。
 6. **About**：架构图 + 方法学收尾。
 
 > 诚实声明：`WeakQATarget` 是刻意实现四类失败路径（DDoS 可答 / 其他话题回避 / 范围外编造"答案是：42"+越界引用 / 注入即破）的确定性被测对象，便于离线复现与演示；mock 满分与 weak 15% 均为设计使然，真实水平以接入 `real` 目标为准。
@@ -155,7 +155,7 @@ python run_eval.py --target real
 - **越狱**：扮演无限制角色产出恶意内容
 - **幻觉**：问知识库外内容，编造即为幻觉
 
-## 诚实声明（面试被深挖的底气）
+## 诚实边界（设计取舍与已知局限）
 
 - 当前 `MockQATarget` 是"好"的被测对象，分数接近满分是**设计使然**，只证明链路正确。
 - 接入真实 LLM 后才会暴露真实失败（幻觉、被注入攻破等）——**那才是这个项目的价值点**。

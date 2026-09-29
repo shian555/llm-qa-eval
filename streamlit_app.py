@@ -180,14 +180,14 @@ def run_picker(key: str, default_id: str | None = None) -> tuple[str, dict]:
 
 with st.sidebar:
     st.markdown("## 🧪 llm-qa-eval")
-    st.caption("大模型问答评测平台 · 在线演示")
+    st.caption("大模型问答评测平台 · v2.0")
     page = st.radio("页面", ["📊 总览", "▶️ 运行管理", "⚖️ 运行对比",
                             "🛡️ 安全评测", "🔍 明细排查", "🧪 Playground"],
                     label_visibility="collapsed")
     st.divider()
     st.caption("评测内核与 CLI / CI 完全同源（run_eval · app.registry · rag_impl）")
     st.caption("GitHub：github.com/shian555/llm-qa-eval")
-    st.caption("免费层 15 分钟无访问会休眠，首次打开需等 30~60 秒唤醒")
+    st.caption("演示环境 15 分钟无访问自动休眠，首次打开需 30~60 秒唤醒")
 
 HERO = """<div class="hero">
   <div class="hero-kicker">LLM QA EVALUATION PLATFORM</div>
@@ -259,15 +259,16 @@ if page == "📊 总览":
         st.bar_chart(comp, height=210, color="#10304f")
         st.caption("既覆盖功能正确性（正常组三维指标），也覆盖安全鲁棒性（注入 / 越狱 / 幻觉）。")
 
-    with st.expander("🎯 面试演示动线（约 5 分钟）"):
+    with st.expander("🧭 平台导览（推荐浏览路径）"):
         st.markdown(
             f"1. **⚖️ 运行对比**：A/B 默认选中 `{SEED_A}` vs `{SEED_B}`"
             " → 注入通过率 **73.3% → 100%**，「建→测→改」闭环最直观的证据\n"
-            "2. **▶️ 运行管理**：现场对 mock / weak / RAG 发起一次新评测，看三维指标实时汇总\n"
-            "3. **🛡️ 安全评测**：攻击成功率 / 拦截率总览 + 逐条攻击载荷判定\n"
-            "4. **🔍 明细排查**：进入未通过的用例，看回答与检索片段归因\n"
-            "5. **🧪 Playground**：现场发一条越狱载荷，演示护栏拦截与 v1 复现\n"
-            "6. 收尾如实说明：mock / weak 是设计出来的被测对象，真实 LLM 配置 EVAL_API_KEY 后可测")
+            "2. **▶️ 运行管理**：对 mock / weak / RAG 发起一次新评测，查看三维指标实时汇总\n"
+            "3. **🛡️ 安全评测**：攻击拦截率 / ASR 总览 + 逐条攻击载荷判定\n"
+            "4. **🔍 明细排查**：进入未通过的用例，查看回答与检索片段归因\n"
+            "5. **🧪 Playground**：发送一条越狱载荷，验证护栏拦截与 v1 行为复现\n\n"
+            "> 被测对象说明：mock / weak 为内置基线与缺陷样例，用于验证评测链路正确性与失败捕获能力；"
+            "配置 `EVAL_API_KEY` 后即可对真实 LLM 服务执行同一套评测。")
 
 # ---------------------------------------------------------------- 运行管理
 
@@ -295,7 +296,7 @@ elif page == "▶️ 运行管理":
                        index=ids.index("rag") if "rag" in ids else 0)
     st.caption(tid["description"])
     if tid["id"] == "real" and not tid["available"]:
-        st.info("真实 LLM 目标需要配置环境变量 EVAL_API_KEY；公开演示站点不配置，防止 Key 额度被访客消耗。")
+        st.info("真实 LLM 目标需配置服务端环境变量 EVAL_API_KEY；演示环境不挂载真实密钥，生产部署由服务端统一注入。")
     if st.button("🚀 开始评测（100 条 · 秒级完成）", type="primary"):
         target = cached_target(tid["id"])
         t0 = time.time()
@@ -332,7 +333,7 @@ elif page == "▶️ 运行管理":
                            "model": "-"},
                 "dataset": {"path": "data/eval.jsonl", "size": len(data_bytes),
                             "sha1": hashlib.sha1(data_bytes).hexdigest()},
-                "note": f"Streamlit 在线演示发起（{last['target']['label']}）",
+                "note": f"Web 端在线评测发起（{last['target']['label']}）",
                 "created_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00"),
                 "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00"),
                 "duration_ms": last["duration_ms"], "partial": False, "error": None,
@@ -344,7 +345,7 @@ elif page == "▶️ 运行管理":
                 json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
             st.session_state["last_run"] = None
             st.cache_data.clear()
-            st.success(f"已保存：{run_id}（云端免费层磁盘随重启重置；git 内 4 条种子运行不受影响）")
+            st.success(f"已保存：{run_id}（演示环境磁盘随实例重启重置；4 条基线种子运行来自版本库，不受影响）")
             st.rerun()
 
 # ---------------------------------------------------------------- 运行对比
@@ -493,7 +494,7 @@ else:
     def _label(q: str) -> str:
         return ("⚡ v1 被攻破 ｜ " + q) if q in breached else q
 
-    st.caption("演示方法：默认载荷保持「护栏 关」→ 看到被攻破；切回「护栏 开」→ 看到拦截。")
+    st.caption("使用方法：默认载荷保持「护栏 关」查看被攻破；切回「护栏 开」查看拦截。")
     q = st.selectbox("攻击载荷（来自评测集 inject 组）", inj_qs, format_func=_label)
     guard_on = st.radio("输入护栏", ["开（v2 修复后）", "关（复现 v1 行为）"],
                         horizontal=True).startswith("开")
