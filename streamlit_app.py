@@ -35,19 +35,50 @@ SEED_B = "r-seed-rag-v2-guarded"
 
 st.markdown(
     """<style>
-    .block-container {padding-top: 2.4rem; max-width: 1200px;}
+    html, body, [class*="css"] {
+        font-family: -apple-system, "Segoe UI", "Microsoft YaHei",
+                     "PingFang SC", "Source Han Sans SC", sans-serif;}
+    .block-container {padding-top: 2.2rem; max-width: 1180px;}
     #MainMenu {visibility: hidden;} footer {visibility: hidden;}
-    section[data-testid="stSidebar"] {background: #0e2440;}
+    section[data-testid="stSidebar"] {background: #0b1f38;}
     section[data-testid="stSidebar"] * {color: #dbe7f4 !important;}
     section[data-testid="stSidebar"] hr {border-color: #24466e;}
+    section[data-testid="stSidebar"] .stRadio label {
+        font-size: 1rem; padding: 3px 2px;}
     [data-testid="stMetric"] {
         background: linear-gradient(180deg, #fbfdff, #f1f6fc);
-        border: 1px solid #e2eaf4; border-radius: 12px;
+        border: 1px solid #e2eaf4; border-top: 3px solid #1f6feb;
+        border-radius: 12px; box-shadow: 0 1px 5px rgba(16, 48, 79, .07);
         padding: 16px 18px 12px 18px;}
     [data-testid="stMetricLabel"] p {font-size: .86rem; color: #5a6b80;}
-    [data-testid="stMetricValue"] {font-size: 1.65rem; color: #10304f;}
-    h1, h2 {color: #10304f; letter-spacing: .5px;}
-    .stDataFrame {border: 1px solid #e8eef5; border-radius: 8px;}
+    [data-testid="stMetricValue"] {font-size: 1.62rem; color: #10304f; font-weight: 700;}
+    h1 {color: #10304f; letter-spacing: .5px;
+        padding-bottom: 8px; border-bottom: 2px solid #e2eaf4;}
+    h2 {color: #10304f; border-left: 5px solid #1f6feb; padding-left: 10px;}
+    .stButton > button {border-radius: 10px;}
+    .hero {background: linear-gradient(135deg, #0b1f38 0%, #123b66 60%, #1f6feb 135%);
+           border-radius: 16px; padding: 26px 32px 24px 32px;
+           color: #fff; margin-bottom: 14px;}
+    .hero-kicker {font-size: .72rem; letter-spacing: .35em; color: #9cc3f5;
+                  font-weight: 700; margin-bottom: 6px;}
+    .hero-title {font-size: 1.85rem; font-weight: 800; letter-spacing: .5px;}
+    .hero-sub {margin-top: 8px; color: #cfe0f5; font-size: .95rem; line-height: 1.6;}
+    .chip-row {margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;}
+    .chip {background: rgba(255, 255, 255, .10); border: 1px solid rgba(255, 255, 255, .28);
+           border-radius: 999px; padding: 4px 14px; font-size: .82rem; color: #eaf2fc;}
+    .chip.accent {background: #2f7bff; border-color: #5a9bff; color: #fff; font-weight: 600;}
+    .pipe {display: flex; gap: 10px; align-items: stretch; margin: 4px 0 18px 0; flex-wrap: wrap;}
+    .pipe-card {flex: 1; min-width: 200px; background: #f6f9fd; border: 1px solid #e2eaf4;
+                border-left: 4px solid #1f6feb; border-radius: 12px; padding: 13px 16px;}
+    .pipe-step {font-size: .68rem; letter-spacing: .22em; color: #7a8ba0; font-weight: 700;}
+    .pipe-card b {display: block; font-size: 1.04rem; color: #10304f; margin: 4px 0 2px 0;}
+    .pipe-card span {font-size: .84rem; color: #5a6b80;}
+    .pipe-arrow {align-self: center; font-size: 1.25rem; color: #1f6feb; font-weight: 700;}
+    @media (max-width: 760px) {
+        .pipe {flex-direction: column;}
+        .pipe-arrow {transform: rotate(90deg); align-self: center;}
+        .hero {padding: 20px 22px;}
+        .hero-title {font-size: 1.4rem;}}
     </style>""",
     unsafe_allow_html=True)
 
@@ -158,12 +189,37 @@ with st.sidebar:
     st.caption("GitHub：github.com/shian555/llm-qa-eval")
     st.caption("免费层 15 分钟无访问会休眠，首次打开需等 30~60 秒唤醒")
 
-st.title("🧪 llm-qa-eval · 大模型问答评测平台")
-st.caption("建 RAG → 测 RAG → 改 RAG 闭环：内置自建 RAG 被测对象 + 检索/问答/引用三维指标 + 注入·越狱·幻觉安全评测")
+HERO = """<div class="hero">
+  <div class="hero-kicker">LLM QA EVALUATION PLATFORM</div>
+  <div class="hero-title">🧪 llm-qa-eval · 大模型问答评测平台</div>
+  <div class="hero-sub">自建 RAG 被测对象 × 检索 / 问答 / 引用三维指标 × 注入 · 越狱 · 幻觉安全评测
+  ｜ 评测内核与 CLI / CI 完全同源，每次 push 自动回归</div>
+  <div class="chip-row"><span class="chip">100 条评测集（70 / 15 / 15）</span>
+  <span class="chip">4 类被测对象</span>
+  <span class="chip accent">注入通过率 73.3% → 100% 安全闭环</span>
+  <span class="chip">Pytest + GitHub Actions</span></div>
+</div>"""
+
+PIPE = """<div class="pipe">
+  <div class="pipe-card"><div class="pipe-step">STEP 1 · 建</div><b>自建 RAG 问答系统</b>
+  <span>文档分块 → 检索 → 带引用编号生成（rag_impl 模块）</span></div>
+  <div class="pipe-arrow">➜</div>
+  <div class="pipe-card"><div class="pipe-step">STEP 2 · 测</div><b>三维指标 + 安全评测</b>
+  <span>100 条评测集：正常 70 / 注入 15 / 幻觉 15</span></div>
+  <div class="pipe-arrow">➜</div>
+  <div class="pipe-card"><div class="pipe-step">STEP 3 · 改</div><b>按评测结果改进</b>
+  <span>加输入护栏，注入通过率 73.3% → 100%，A/B 实录可查</span></div>
+</div>"""
+
+if page != "📊 总览":
+    st.title(page)
+    st.caption("建 RAG → 测 RAG → 改 RAG 闭环 ｜ GitHub：github.com/shian555/llm-qa-eval")
 
 # ---------------------------------------------------------------- 总览
 
 if page == "📊 总览":
+    st.markdown(HERO, unsafe_allow_html=True)
+    st.markdown(PIPE, unsafe_allow_html=True)
     runs = list_runs()
     inj_rates = [r["summary"].get("by_type", {}).get("inject", {}).get("pass_rate")
                  for r in runs if r["summary"]]
